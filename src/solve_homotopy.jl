@@ -95,9 +95,9 @@ function get_steady_states(prob::Problem, swept_parameters::ParameterRange, fixe
     # feed the array into HomotopyContinuation, get back an similar array of solutions
     raw = _get_raw_solution(prob, input_array, sweep=swept_parameters, random_warmup=random_warmup, threading=threading)
     
-    # extract all the information we need from results
-    #rounded_solutions = unique_points.(HomotopyContinuation.solutions.(getindex.(raw, 1)); metric = EuclideanNorm(), atol=1E-14, rtol=1E-8)
-    rounded_solutions = HomotopyContinuation.solutions.(getindex.(raw, 1));
+    # extract all the information we need from results   
+    rounded_solutions = filter_singular(prob.system, raw);
+    
     all(isempty.(rounded_solutions)) ? error("No solutions found!") : nothing
     solutions = pad_solutions(rounded_solutions)
 
@@ -259,6 +259,7 @@ function pad_solutions(solutions::Array{Vector{Vector{ComplexF64}}}; padding_val
     padded_solutions = deepcopy(solutions)
     for (i,s) in enumerate(solutions)
         if Ls[i]<max_N
+            @warn("padding solutions - some points yielded different numbers of solutions than others!")
             padded_solutions[i] = vcat(solutions[i],[padding_value*ones(nvars) for k in 1:(max_N-length(s))])
         end
     end

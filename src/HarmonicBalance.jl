@@ -41,6 +41,7 @@ module HarmonicBalance
     include("HarmonicVariable.jl")
     include("HarmonicEquation.jl")
     include("solve_homotopy.jl")
+    include("root_filtering.jl")
     include("sorting.jl")
     include("classification.jl")
     include("saving.jl")
